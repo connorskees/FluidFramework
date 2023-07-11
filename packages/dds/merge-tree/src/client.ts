@@ -378,6 +378,8 @@ export class Client extends TypedEventEmitter<IClientEvents> {
 		segment: ISegment,
 		offset: number | undefined,
 		refType: ReferenceType,
+		// todo: make optional everywhere and move to last argument
+		canSlideToEndpoint: boolean,
 		properties: PropertySet | undefined,
 		slidingPreference?: SlidingPreference,
 	): LocalReferencePosition {
@@ -385,6 +387,7 @@ export class Client extends TypedEventEmitter<IClientEvents> {
 			segment,
 			offset ?? 0,
 			refType,
+			canSlideToEndpoint,
 			properties,
 			slidingPreference,
 		);
@@ -1084,7 +1087,7 @@ export class Client extends TypedEventEmitter<IClientEvents> {
 		if (segoff.segment === undefined) {
 			return segoff;
 		}
-		const segment = this._mergeTree._getSlideToSegment(segoff.segment);
+		const [segment, _] = this._mergeTree._getSlideToSegment(segoff.segment);
 		if (segment === segoff.segment) {
 			return segoff;
 		}

@@ -127,6 +127,8 @@ export interface ISegment extends IMergeNodeCommon, Partial<IRemovalInfo> {
 	readonly type: string;
 	readonly segmentGroups: SegmentGroupCollection;
 	readonly trackingCollection: TrackingGroupCollection;
+	// todo: make optional
+	readonly isEndpoint: boolean;
 
 	/**
 	 * Stores attribution keys associated with offsets of this segment.
@@ -311,7 +313,7 @@ export class MergeNode implements IMergeNodeCommon {
 	parent?: IMergeBlock;
 	cachedLength: number = 0;
 
-	isLeaf() {
+	isLeaf(): this is ISegment {
 		return false;
 	}
 }
@@ -375,6 +377,7 @@ export abstract class BaseSegment extends MergeNode implements ISegment {
 	public seq: number = UniversalSequenceNumber;
 	public removedSeq?: number;
 	public removedClientIds?: number[];
+	readonly isEndpoint = false;
 	public readonly segmentGroups: SegmentGroupCollection = new SegmentGroupCollection(this);
 	public readonly trackingCollection: TrackingGroupCollection = new TrackingGroupCollection(this);
 	/**
