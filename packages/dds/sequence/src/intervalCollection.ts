@@ -801,11 +801,11 @@ function createPositionReferenceFromSegoff(
 	client: Client,
 	segoff: { segment: ISegment | undefined; offset: number | undefined },
 	refType: ReferenceType,
-	canSlideToEndpoint: boolean,
 	op?: ISequencedDocumentMessage,
 	localSeq?: number,
 	fromSnapshot?: boolean,
 	slidingPreference?: SlidingPreference,
+	canSlideToEndpoint?: boolean,
 ): LocalReferencePosition {
 	if (segoff.segment) {
 		const ref = client.createLocalReferencePosition(
@@ -879,11 +879,11 @@ function createPositionReference(
 		client,
 		segoff,
 		refType,
-		exclusive,
 		op,
 		localSeq,
 		fromSnapshot,
 		slidingPreference,
+		exclusive,
 	);
 }
 
@@ -1617,7 +1617,7 @@ export class LocalIntervalCollection<TInterval extends ISerializableInterval> {
 				ReferenceType.Transient,
 				ref.properties,
 				ref.slidingPreference,
-				(ref as any).canSlideToEndpoint,
+				ref.canSlideToEndpoint,
 			);
 		};
 		if (interval instanceof SequenceInterval) {
@@ -2794,13 +2794,13 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
 					this.client,
 					newStart,
 					interval.start.refType,
-					canBeExclusive &&
-						startReferenceSlidingPreference(interval.stickiness) ===
-							SlidingPreference.BACKWARD,
 					op,
 					undefined,
 					undefined,
 					startReferenceSlidingPreference(interval.stickiness),
+					canBeExclusive &&
+						startReferenceSlidingPreference(interval.stickiness) ===
+							SlidingPreference.BACKWARD,
 				);
 				if (props) {
 					interval.start.addProperties(props);
@@ -2817,13 +2817,13 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
 					this.client,
 					newEnd,
 					interval.end.refType,
-					canBeExclusive &&
-						endReferenceSlidingPreference(interval.stickiness) ===
-							SlidingPreference.FORWARD,
 					op,
 					undefined,
 					undefined,
 					endReferenceSlidingPreference(interval.stickiness),
+					canBeExclusive &&
+						endReferenceSlidingPreference(interval.stickiness) ===
+							SlidingPreference.FORWARD,
 				);
 				if (props) {
 					interval.end.addProperties(props);
