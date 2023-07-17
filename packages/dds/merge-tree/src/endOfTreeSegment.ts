@@ -122,6 +122,7 @@ const notSupported = () => {
 export class StartOfTreeSegment implements ISegment, IRemovalInfo {
 	type: string = "StartOfTreeSegment";
 	readonly isEndpoint = true;
+	readonly isStartEndpoint = true;
 	constructor(private readonly mergeTree: MergeTree) {}
 	/*
 	 * segments must be of at least length one, but

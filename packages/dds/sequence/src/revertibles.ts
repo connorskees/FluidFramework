@@ -126,14 +126,12 @@ export function appendDeleteIntervalToRevertibles(
 		startSeg,
 		interval.start.getOffset(),
 		ReferenceType.StayOnRemove | ReferenceType.RangeBegin,
-		false,
 		undefined,
 	);
 	const endRef = string.createLocalReferencePosition(
 		endSeg,
 		interval.end.getOffset(),
 		ReferenceType.StayOnRemove | ReferenceType.RangeEnd,
-		false,
 		undefined,
 	);
 	const revertible = {
@@ -165,14 +163,12 @@ export function appendChangeIntervalToRevertibles(
 		startSeg,
 		previousInterval.start.getOffset(),
 		ReferenceType.StayOnRemove | ReferenceType.RangeBegin,
-		false,
 		undefined,
 	);
 	const prevEndRef = string.createLocalReferencePosition(
 		endSeg,
 		previousInterval.end.getOffset(),
 		ReferenceType.StayOnRemove | ReferenceType.RangeEnd,
-		false,
 		undefined,
 	);
 	const revertible = {
@@ -516,7 +512,6 @@ function revertLocalSequenceRemove(
 					pos.segment as SharedStringSegment,
 					pos.offset,
 					ReferenceType.StayOnRemove | ReferenceType.RangeBegin,
-					false,
 					{ revertible: revertibleRef.revertible },
 				);
 				revertibleRef.revertible.start = newRef;
@@ -526,7 +521,6 @@ function revertLocalSequenceRemove(
 					pos.segment as SharedStringSegment,
 					pos.offset,
 					ReferenceType.StayOnRemove | ReferenceType.RangeEnd,
-					false,
 					{ revertible: revertibleRef.revertible },
 				);
 				revertibleRef.revertible.end = newRef;
