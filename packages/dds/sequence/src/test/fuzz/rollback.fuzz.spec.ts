@@ -8,20 +8,21 @@ import {
 	AsyncGenerator as Generator,
 	takeAsync as take,
 } from "@fluid-internal/stochastic-test-utils";
-import { createDDSFuzzSuite } from "@fluid-internal/test-dds-utils";
-import { FlushMode } from "@fluidframework/runtime-definitions";
+import { createDDSFuzzSuite, DDSFuzzModel } from "@fluid-internal/test-dds-utils";
 import {
-	Operation,
 	FuzzTestState,
-	defaultIntervalOperationGenerationConfig,
-	createSharedStringGeneratorOperations,
-	SharedStringOperationGenerationConfig,
+	RevertOperation,
 	baseModel,
 	defaultFuzzOptions,
+	defaultIntervalOperationGenerationConfig,
+	SharedStringFuzzFactory,
+	SharedStringOperationGenerationConfig,
+	Operation,
+	createSharedStringGeneratorOperations,
 } from "./fuzzUtils";
 
 type ClientOpState = FuzzTestState;
-export function makeSharedStringOperationGenerator(
+function makeSharedStringOperationGenerator(
 	optionsParam?: SharedStringOperationGenerationConfig,
 	alwaysLeaveChar: boolean = false,
 ): Generator<Operation, ClientOpState> {
@@ -49,49 +50,33 @@ export function makeSharedStringOperationGenerator(
 	]);
 }
 
-const baseSharedStringModel = {
-	...baseModel,
-	generatorFactory: () =>
-		take(100, makeSharedStringOperationGenerator(defaultIntervalOperationGenerationConfig)),
-};
-
-describe("SharedString no reconnect fuzz testing", () => {
-	const noReconnectNoIntervalsModel = {
-		...baseSharedStringModel,
-		workloadName: "SharedString without reconnects",
+describe("rollback fuzz testing", () => {
+	const baseSharedStringModel: DDSFuzzModel<
+		SharedStringFuzzFactory,
+		RevertOperation,
+		FuzzTestState
+	> = {
+		...baseModel,
+		workloadName: "rollback",
+		generatorFactory: () =>
+			take(
+				10,
+				makeSharedStringOperationGenerator({
+					...defaultIntervalOperationGenerationConfig,
+					rollbackProbability: 0.2,
+				}),
+			),
 	};
 
-	createDDSFuzzSuite(noReconnectNoIntervalsModel, {
+	createDDSFuzzSuite(baseSharedStringModel, {
 		...defaultFuzzOptions,
+		defaultTestCount: 10,
 		reconnectProbability: 0.0,
 		clientJoinOptions: {
 			maxNumberOfClients: 3,
 			clientAddProbability: 0.0,
 		},
-		// Uncomment this line to replay a specific seed from its failure file:
-		// replay: 0,
-	});
-});
-
-describe("SharedString fuzz testing with rebased batches", () => {
-	const noReconnectWithRebaseModel = {
-		...baseSharedStringModel,
-		workloadName: "SharedString with rebasing",
-	};
-
-	createDDSFuzzSuite(noReconnectWithRebaseModel, {
-		...defaultFuzzOptions,
-		reconnectProbability: 0.0,
-		numberOfClients: 3,
-		clientJoinOptions: {
-			maxNumberOfClients: 3,
-			clientAddProbability: 0.0,
-		},
-		rebaseProbability: 0.2,
-		containerRuntimeOptions: {
-			flushMode: FlushMode.TurnBased,
-			enableGroupedBatching: true,
-		},
+		// skipMinimization: true,
 		// Uncomment this line to replay a specific seed from its failure file:
 		// replay: 0,
 	});

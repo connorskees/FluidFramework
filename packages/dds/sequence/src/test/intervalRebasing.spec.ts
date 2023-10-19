@@ -10,6 +10,7 @@ import {
 	MockFluidDataStoreRuntime,
 	MockStorage,
 } from "@fluidframework/test-runtime-utils";
+import { MergeTreeDeltaType } from "@fluidframework/merge-tree";
 import { SharedStringFactory } from "../sequenceFactory";
 import { SharedString } from "../sharedString";
 import { IntervalStickiness, IntervalType } from "../intervals";
@@ -271,6 +272,52 @@ describe("interval rebasing", () => {
 		assert.equal(interval.stickiness, IntervalStickiness.FULL);
 		clients[0].containerRuntime.connected = true;
 		containerRuntimeFactory.processAllMessages();
+		assertConsistent(clients);
+	});
+
+	it.only("rollback remove", () => {
+		clients[0].containerRuntime.connected = false;
+		clients[1].containerRuntime.connected = false;
+		clients[1].sharedString.insertText(0, "A");
+		clients[0].sharedString.insertText(0, "B");
+
+		clients[1].sharedString.removeRange(0, 1);
+
+		// eslint-disable-next-line @typescript-eslint/dot-notation
+		const client = clients[1].sharedString["client"];
+
+		client.rollback?.({ type: MergeTreeDeltaType.REMOVE }, client.peekPendingSegmentGroups());
+
+		clients[0].containerRuntime.connected = true;
+		clients[1].containerRuntime.connected = true;
+
+		containerRuntimeFactory.processAllMessages();
+
+		assert.equal(clients[0].sharedString.getText(), "BA");
+
+		assertConsistent(clients);
+	});
+
+	it.only("rollback remove while disconnected", () => {
+		clients[0].containerRuntime.connected = false;
+		clients[1].containerRuntime.connected = false;
+		clients[1].sharedString.insertText(0, "A");
+		clients[0].sharedString.insertText(0, "B");
+
+		clients[1].sharedString.removeRange(0, 1);
+
+		// eslint-disable-next-line @typescript-eslint/dot-notation
+		const client = clients[1].sharedString["client"];
+
+		client.rollback?.({ type: MergeTreeDeltaType.REMOVE }, client.peekPendingSegmentGroups());
+
+		clients[0].containerRuntime.connected = true;
+		clients[1].containerRuntime.connected = true;
+
+		containerRuntimeFactory.processAllMessages();
+
+		assert.equal(clients[0].sharedString.getText(), "BA");
+
 		assertConsistent(clients);
 	});
 });
